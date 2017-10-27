@@ -41,7 +41,6 @@ for e in range(epoch):
             wcaches = []
             for index in sent:
                 wforward,wcache = word_embedding_forward(np.array([index]),Wembed)
-                print(wforward.shape)
                 hprev,tcache = forward(wforward,hprev,Wx,Wh,bh)
                 caches.append(tcache)
                 wcaches.append(wcache)
@@ -50,7 +49,7 @@ for e in range(epoch):
             out,tcache = affine_forward(hprev,Why,by)
             #print(out.shape)
             predicted,loss,dx = softmax_loss(out,trainY[x])
-            if x == len(trainX)-1:
+            if x%500 == 0:
                 print("Loss is: "+str(loss))
             dx,dWhy,dby = affine_backward(dx,tcache)
             Why -= learning_rate*dWhy
