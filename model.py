@@ -13,7 +13,7 @@ trainX = X[:5000]
 trainY = y[:5000]
 testX = X[5000:]
 testY = y[5000:]
-embed_dimension = 100
+embed_dimension = 1000
 
 hidden_dimension = 128
 output_dimension = 8
@@ -45,9 +45,7 @@ for e in range(epoch):
                 caches.append(tcache)
                 wcaches.append(wcache)
             
-            #print(hprev.shape)
             out,tcache = affine_forward(hprev,Why,by)
-            #print(out.shape)
             predicted,loss,dx = softmax_loss(out,trainY[x])
             if x%500 == 0:
                 print("Loss is: "+str(loss))
@@ -85,4 +83,14 @@ for x in range(len(testX)):
         predicted= softmax_loss(out)
         if predicted == testY[x]:
             summ+=1
+
 print(1.*summ/len(testY))
+data = {}
+data['Wh']=Wh.to_list()
+data['Wembed']=Wh.to_list()
+data['Wx']=Wh.to_list()
+data['bh']=bh.to_list()
+data['by']=by.to_list()
+data['Why']=Why.to_list()
+
+json.dump(data,open("model.json","wb"))
