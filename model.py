@@ -13,9 +13,9 @@ trainX = X[:5000]
 trainY = y[:5000]
 testX = X[5000:]
 testY = y[5000:]
-embed_dimension = 128
+embed_dimension = 100
 
-hidden_dimension = 256
+hidden_dimension = 128
 output_dimension = 8
 
 Wembed = np.random.normal(loc=0.0, scale=1.0,size=(vocab_size,embed_dimension))
@@ -24,14 +24,14 @@ Wh = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,hidden_dimension)
 bh = np.zeros((hidden_dimension,))
 Why = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,output_dimension))
 by = np.zeros((output_dimension,))
-epoch = 1000
+epoch = 100
                       
-learning_rate = 1e-3
+learning_rate = 1e-5
 bptt = 4
 forward= rnn_step
 backward = rnn_step_backward
 for e in range(epoch):
-    for x in range(len(X)):
+    for x in range(len(trainX)):
         index_sentence = trainX[x].strip().split(" ")
         hprev = np.zeros((1,hidden_dimension))
         index_sentence2 = map(str,index_sentence)
@@ -50,7 +50,8 @@ for e in range(epoch):
             out,tcache = affine_forward(hprev,Why,by)
             #print(out.shape)
             predicted,loss,dx = softmax_loss(out,trainY[x])
-            print("Loss is: "+str(loss))
+            if x == len(trainX)-1:
+                print("Loss is: "+str(loss))
             dx,dWhy,dby = affine_backward(dx,tcache)
             Why -= learning_rate*dWhy
             by -= learning_rate*dby
@@ -70,3 +71,19 @@ for e in range(epoch):
             Wh -= learning_rate*dWh
             bh -= learning_rate*dbh
             Wembed -= learning_rate*dWembed
+summ = 0
+for x in range(len(testX)):
+    index_sentence = testX[x].strip().split(" ")
+    hprev = np.zeros((1,hidden_dimension))
+    index_sentence2 = map(str,index_sentence)
+    for start_index in range(0,len(index_sentence2),bptt):
+        sent = map(int,index_sentence2[start_index:min(start_index+bptt,len(index_sentence2))])
+        for index in sent:
+            wforward,_ = word_embedding_forward(np.array([index]),Wembed)
+            hprev,_= forward(wforward,hprev,Wx,Wh,bh)
+
+        out,_= affine_forward(hprev,Why,by)
+        predicted= softmax_loss(out)
+        if predicted == testY[x]:
+            summ+=1
+print(1.*summ/len(testY))
