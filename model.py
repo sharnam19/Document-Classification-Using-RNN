@@ -25,12 +25,14 @@ bh = np.zeros((hidden_dimension,))
 Why = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,output_dimension))
 by = np.zeros((output_dimension,))
 epoch = 100
-                      
+
+losses = []
 learning_rate = 1e-3
 bptt = 4
 forward= rnn_step
 backward = rnn_step_backward
 for e in range(epoch):
+    totalLoss = 0.0
     for x in range(len(trainX)):
         index_sentence = trainX[x].strip().split(" ")
         hprev = np.zeros((1,hidden_dimension))
@@ -47,8 +49,7 @@ for e in range(epoch):
             
             out,tcache = affine_forward(hprev,Why,by)
             predicted,loss,dx = softmax_loss(out,trainY[x])
-            if x%100 == 0:
-                print("Loss is: "+str(loss))
+            totalLoss += loss
             dx,dWhy,dby = affine_backward(dx,tcache)
             Why -= learning_rate*dWhy
             by -= learning_rate*dby
@@ -68,6 +69,9 @@ for e in range(epoch):
             Wh -= learning_rate*dWh
             bh -= learning_rate*dbh
             Wembed -= learning_rate*dWembed
+    losses.append(totalLoss/float(len(trainX)))
+    print("Loss: "+losses[-1])
+
 summ = 0
 for x in range(len(testX)):
     index_sentence = testX[x].strip().split(" ")
@@ -92,5 +96,6 @@ data['Wx']=Wh.to_list()
 data['bh']=bh.to_list()
 data['by']=by.to_list()
 data['Why']=Why.to_list()
+data['loss']=losses
 
 json.dump(data,open("model.json","wb"))
