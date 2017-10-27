@@ -39,42 +39,6 @@ def rnn_step_backward(dOut,cache):
     
     return dx,dh_prev,dWx,dWh,db
 
-def rnn_forward(x,h0,Wx,Wh,b):
-    """
-        Input:
-            x: Input of shape (N,T,D)
-            h0: Initial State of shape (N,H)
-            Wx : Input to Hidden Weights (D,H)
-            Wh : Hidden to Hidden Weights (H,H)
-            b : Bias of shape (H,)
-    """
-    prev_h = h0
-    caches=[]
-    N,T,D = x.shape
-    H = h0.shape[1]
-    h = np.zeros((N,T,H))
-    for t in range(T):
-        prev_h,temp_cache = rnn_step(x[:,t,:],prev_h,Wx,Wh,b)
-        h[:,t,:]=prev_h
-        caches.append(temp_cache)
-    return h,caches
-
-def rnn_backward(dh,caches):
-    N,T,H = dh.shape
-    D = caches[0][0].shape[1]
-    dx = np.zeros((N,T,D))
-    dWx = np.zeros((D,H))
-    dWh = np.zeros((H,H))
-    db = np.zeros((H,))
-    dprev_h=np.zeros((N,H))
-    for t in range(T)[::-1]:
-        dx[:,t,:],dprev_h,dWx_t,dWh_t,db_t = rnn_step_backward(dprev_h+dh[:,t,:],caches[t])
-        dWx+=dWx_t
-        dWh+=dWh_t
-        db+=db_t
-    
-    return dx,dprev_h,dWx,dWh,db
-
 def word_embedding_forward(x, W):
     out, cache = None, None
     V,D = W.shape

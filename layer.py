@@ -29,28 +29,3 @@ def affine_backward(dOut,cache):
     db = np.sum(dOut,axis=0)
         
     return dx,dw,db
-
-def flatten_forward(x):
-    """
-        Input:
-            x of any shape (N,D1,D2,D3,.....Dn)
-        Output:
-            out : of shape (N,D1*D2*D3*....Dn)
-            cache: consisting of shape
-    """
-    shape = x.shape
-    out = x.reshape(shape[0],-1)
-    cache = (shape)
-    return out,cache
-
-def flatten_backward(dOut,cache):
-    """
-    Input:
-        dOut: Upstream gradients in shape (N,D1*D2*D3*.....Dn)
-        cache: (shape of input tensor)
-    Output:
-        dx: dOut reshaped in shape of x
-    """
-    (shape)=cache
-    dx = dOut.reshape(shape)
-    return dx
