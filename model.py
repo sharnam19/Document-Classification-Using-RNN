@@ -26,7 +26,7 @@ Why = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,output_dimension
 by = np.zeros((output_dimension,))
 epoch = 100
                       
-learning_rate = 1e-5
+learning_rate = 1e-3
 bptt = 4
 forward= rnn_step
 backward = rnn_step_backward
@@ -47,7 +47,7 @@ for e in range(epoch):
             
             out,tcache = affine_forward(hprev,Why,by)
             predicted,loss,dx = softmax_loss(out,trainY[x])
-            if x%500 == 0:
+            if x%100 == 0:
                 print("Loss is: "+str(loss))
             dx,dWhy,dby = affine_backward(dx,tcache)
             Why -= learning_rate*dWhy
