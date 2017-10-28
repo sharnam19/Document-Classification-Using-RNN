@@ -13,7 +13,7 @@ trainX = X[:5000]
 trainY = y[:5000]
 testX = X[5000:]
 testY = y[5000:]
-embed_dimension = 1000
+embed_dimension = 100
 
 hidden_dimension = 128
 output_dimension = 8
