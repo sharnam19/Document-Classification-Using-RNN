@@ -41,6 +41,8 @@ def rnn_step_backward(dOut,cache):
 
 def word_embedding_forward(x, W):
     out, cache = None, None
+    
+    N = x.shape[0]
     V,D = W.shape
     out = W[x]
     cache = (x,V)
@@ -52,10 +54,10 @@ def word_embedding_backward(dout, cache):
     dW = None
     x,V = cache
     
-    N,T = 1,1
+    N = x.shape[0]
     
     D = dout.shape[1]
     dW = np.zeros((V, D))
 
-    np.add.at(dW, x.reshape(N*T), dout.reshape(N*T, D))
+    np.add.at(dW, x.reshape(N), dout.reshape(N, D))
     return dW
