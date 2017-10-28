@@ -22,7 +22,7 @@ testX = X[5000:]
 trainY = np.array(y[:5000])
 testY = np.array(y[5000:])
 
-epoch = 1000
+epoch = 100
 embed_dimension = 100
 hidden_dimension = 128
 output_dimension = 8
@@ -43,7 +43,7 @@ if LOAD == False:
     Why = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,output_dimension))
     by = np.zeros((output_dimension,))
 else:
-    model = json.load(open("model.json","rb"))
+    model = json.load(open("model1.json","rb"))
     Wh = np.array(model['Wh'])
     Wx = np.array(model['Wx'])
     bh = np.array(model['bh'])
@@ -82,7 +82,7 @@ for e in range(epoch):
                 hprev,tcache = forward(wforward,hprev,Wx,Wh,bh)
                 caches.append(tcache)
                 wcaches.append(wcache)
-                
+
                 out,tcache = affine_forward(hprev,Why,by)
                 predicted,loss,dx = softmax_loss(out,trainY[batch_start:min(batch_start+batch_size,X.shape[0])])
                 totalLoss += loss
@@ -108,7 +108,7 @@ for e in range(epoch):
     losses.append(totalLoss/trainX.shape[0])
     print("Loss: "+str(losses[-1]))
     print("Accuracy: "+str(get_accuracy()))
-    
+
 data = {}
 data['Wh']=Wh.tolist()
 data['Wembed']=Wembed.tolist()
@@ -118,4 +118,4 @@ data['by']=by.tolist()
 data['Why']=Why.tolist()
 data['loss']=losses
 
-json.dump(data,open("model1.json","wb"))
+json.dump(data,open("model2.json","wb"))
