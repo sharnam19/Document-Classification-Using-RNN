@@ -8,42 +8,66 @@ X = data['text']
 y = data['labels']
 w2ix = data['w2ix']
 vocab_size = len(w2ix.keys())
-trainX = X[:5000]
-trainY = y[:5000]
-testX = X[5000:]
-testY = y[5000:]
-embed_dimension = 100
-
-hidden_dimension = 128
-output_dimension = 8
-
-Wembed = np.random.normal(loc=0.0, scale=1.0,size=(vocab_size,embed_dimension))
-Wx = np.random.normal(loc=0.0,scale=1.0,size=(embed_dimension,hidden_dimension))
-Wh = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,hidden_dimension))
-bh = np.zeros((hidden_dimension,))
-Why = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,output_dimension))
-by = np.zeros((output_dimension,))
-epoch = 100
-
 losses = []
-learning_rate = 1e-3
-bptt = 4
-batch_size = 128
-T = 20
-forward= rnn_step
-backward = rnn_step_backward
 ix_sentences=[]
+
 for x in range(0,len(X)):
     index_sentence = X[x].strip().split(" ")
     index_sentence = map(int,map(str,index_sentence))
     ix_sentences.append(index_sentence)
 
 X = np.array(ix_sentences)
-print(X.shape)
 trainX = X[:5000]
 testX = X[5000:]
 trainY = np.array(y[:5000])
 testY = np.array(y[5000:])
+
+epoch = 1000
+embed_dimension = 100
+hidden_dimension = 128
+output_dimension = 8
+learning_rate = 1e-3
+bptt = 4
+batch_size = 128
+T = 20
+LOAD = True
+
+forward= rnn_step
+backward = rnn_step_backward
+
+if LOAD == False:
+    Wembed = np.random.normal(loc=0.0, scale=1.0,size=(vocab_size,embed_dimension))
+    Wx = np.random.normal(loc=0.0,scale=1.0,size=(embed_dimension,hidden_dimension))
+    Wh = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,hidden_dimension))
+    bh = np.zeros((hidden_dimension,))
+    Why = np.random.normal(loc=0.0,scale=1.0,size=(hidden_dimension,output_dimension))
+    by = np.zeros((output_dimension,))
+else:
+    model = json.load(open("model.json","rb"))
+    Wh = np.array(model['Wh'])
+    Wx = np.array(model['Wx'])
+    bh = np.array(model['bh'])
+    Why = np.array(model['Why'])
+    by = np.array(model['by'])
+    losses = model['loss']
+    Wembed = np.array(model['Wembed'])
+
+def get_accuracy():
+    global Wx,Wh,bh,by,Why,testX,testY,Wembed
+    summ = 0
+    for batch_start in range(0,testX.shape[0],batch_size):
+        batchX = testX[batch_start:min(batch_start+batch_size,testX.shape[0])]
+        hprev = np.zeros((batchX.shape[0],hidden_dimension))
+        sent = batchX
+        for t in range(0,sent.shape[1]):
+            wforward,_ = word_embedding_forward(sent[:,t],Wembed)
+            hprev,_= forward(wforward,hprev,Wx,Wh,bh)
+
+        out,_= affine_forward(hprev,Why,by)
+        predicted= softmax_loss(out)
+        summ+=np.sum(predicted == testY[batch_start:min(batch_start+batch_size,testX.shape[0])])
+    return 1.*summ/testY.shape[0]
+
 for e in range(epoch):
     totalLoss = 0.0
     for batch_start in range(0,trainX.shape[0],batch_size):
@@ -54,21 +78,12 @@ for e in range(epoch):
             caches = []
             wcaches = []
             for t in range(0,sent.shape[1]):
-                # print("Starting")
-                # print("Sent")
-                # print(sent[:,t].shape)
                 wforward,wcache = word_embedding_forward(sent[:,t],Wembed)
-                # print("Embed")
-                # print(wforward.shape)
                 hprev,tcache = forward(wforward,hprev,Wx,Wh,bh)
-                # print("H")
-                # print(hprev.shape)
                 caches.append(tcache)
                 wcaches.append(wcache)
                 
                 out,tcache = affine_forward(hprev,Why,by)
-                # print("Out")
-                # print(out.shape)
                 predicted,loss,dx = softmax_loss(out,trainY[batch_start:min(batch_start+batch_size,X.shape[0])])
                 totalLoss += loss
                 dx,dWhy,dby = affine_backward(dx,tcache)
@@ -92,22 +107,8 @@ for e in range(epoch):
                 Wembed -= learning_rate*dWembed
     losses.append(totalLoss/trainX.shape[0])
     print("Loss: "+str(losses[-1]))
-
-summ = 0
-for batch_start in range(0,testX.shape[0],batch_size):
-    batchX = testX[batch_start:min(batch_start+batch_size,testX.shape[0])]
-    hprev = np.zeros((batchX.shape[0],hidden_dimension))
-    for start_index in range(0,T,bptt):
-        sent = batchX[:,start_index:min(start_index+bptt,T)]
-        for t in range(0,sent.shape[1]):
-            wforward,_ = word_embedding_forward(sent[:,t],Wembed)
-            hprev,_= forward(wforward,hprev,Wx,Wh,bh)
-
-        out,_= affine_forward(hprev,Why,by)
-        predicted= softmax_loss(out)
-        summ+=np.sum(predicted == testY[batch_start:min(batch_start+batch_size,testX.shape[0])])
-
-print(1.*summ/testY.shape[0])
+    print("Accuracy: "+str(get_accuracy()))
+    
 data = {}
 data['Wh']=Wh.tolist()
 data['Wembed']=Wembed.tolist()
@@ -117,4 +118,4 @@ data['by']=by.tolist()
 data['Why']=Why.tolist()
 data['loss']=losses
 
-json.dump(data,open("model.json","wb"))
+json.dump(data,open("model1.json","wb"))
