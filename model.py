@@ -22,15 +22,15 @@ testX = X[5000:]
 trainY = np.array(y[:5000])
 testY = np.array(y[5000:])
 
-epoch = 100
+epoch = 10000
 embed_dimension = 100
 hidden_dimension = 128
 output_dimension = 8
-learning_rate = 1e-3
+learning_rate = 1e-2
 bptt = 4
-batch_size = 128
+batch_size = 1000
 T = 20
-LOAD = True
+LOAD = False
 
 forward= rnn_step
 backward = rnn_step_backward
@@ -83,28 +83,28 @@ for e in range(epoch):
                 caches.append(tcache)
                 wcaches.append(wcache)
 
-                out,tcache = affine_forward(hprev,Why,by)
-                predicted,loss,dx = softmax_loss(out,trainY[batch_start:min(batch_start+batch_size,X.shape[0])])
-                totalLoss += loss
-                dx,dWhy,dby = affine_backward(dx,tcache)
-                Why -= learning_rate*dWhy
-                by -= learning_rate*dby
-                dWx = np.zeros_like(Wx)
-                dWh = np.zeros_like(Wh)
-                dbh = np.zeros_like(bh)
-                dWembed = np.zeros_like(Wembed)
-                tdh_prev = dx
-                for pos in range(0,len(caches))[::-1]:
-                    dx,tdh_prev,tdWx,tdWh,tdbh = backward(tdh_prev,caches[pos])
-                    dWx+=tdWx
-                    dWh+=tdWh
-                    dbh+=tdbh
-                    tdWembed = word_embedding_backward(dx,wcaches[pos])
-                    dWembed+=tdWembed
-                Wx -= learning_rate*dWx
-                Wh -= learning_rate*dWh
-                bh -= learning_rate*dbh
-                Wembed -= learning_rate*dWembed
+            out,tcache = affine_forward(hprev,Why,by)
+            predicted,loss,dx = softmax_loss(out,trainY[batch_start:min(batch_start+batch_size,X.shape[0])])
+            totalLoss += loss
+            dx,dWhy,dby = affine_backward(dx,tcache)
+            Why -= learning_rate*dWhy
+            by -= learning_rate*dby
+            dWx = np.zeros_like(Wx)
+            dWh = np.zeros_like(Wh)
+            dbh = np.zeros_like(bh)
+            dWembed = np.zeros_like(Wembed)
+            tdh_prev = dx
+            for pos in range(0,len(caches))[::-1]:
+                dx,tdh_prev,tdWx,tdWh,tdbh = backward(tdh_prev,caches[pos])
+                dWx+=tdWx
+                dWh+=tdWh
+                dbh+=tdbh
+                tdWembed = word_embedding_backward(dx,wcaches[pos])
+                dWembed+=tdWembed
+            Wx -= learning_rate*dWx
+            Wh -= learning_rate*dWh
+            bh -= learning_rate*dbh
+            Wembed -= learning_rate*dWembed
     losses.append(totalLoss/trainX.shape[0])
     print("Loss: "+str(losses[-1]))
     print("Accuracy: "+str(get_accuracy()))
