@@ -13,7 +13,7 @@ Had to Fix the **Sequence Length** to **20** and **Pad** with **0**'s to make **
 
 ## RNN Model Configuration
 1. **Learning Rate = 1e-3**
-2. **Epochs = 1100**
+2. **Epochs = 4050**
 3. **Word Embedding Dimension = 100**
 4. **Hidden State Dimension = 128**
 5. **Truncated Backpropagation Length = 4**
@@ -23,8 +23,8 @@ Had to Fix the **Sequence Length** to **20** and **Pad** with **0**'s to make **
 9. **Bias** were **Zero Initialized**
 
 ### Model Performance
- **Test Set Accuracy = 70.19%** \
- The training time for the model was about **4 hours**
+ **Test Set Accuracy = 74.22%** \
+ The training time for the model was about **6 hours**
 
 ### Loss-Iteration Curve
 ![Loss-Iteration Curve for 1100 Epochs](/loss_curve.png)
