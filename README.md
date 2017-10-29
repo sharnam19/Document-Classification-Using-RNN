@@ -12,13 +12,13 @@ The Dataset consists of Textual Data that belong to one of the **8** Categories
 Had to Fix the **Sequence Length** to **20** and **Pad** with **0**'s to make **Training Faster**
 
 ## RNN Model Configuration
-1. **Learning Rate = 1e-3**
+1. **Learning Rate = 1e-2**
 2. **Epochs = 4050**
 3. **Word Embedding Dimension = 100**
 4. **Hidden State Dimension = 128**
 5. **Truncated Backpropagation Length = 4**
 6. **Training Sequence Length = 20**
-7. **Batch Size = 128**
+7. **Batch Size = 1000**
 8. **Weight Initialization** was done from a **Gaussian Distribution** with **mean=0.0** and **std=1**
 9. **Bias** were **Zero Initialized**
 
@@ -27,7 +27,7 @@ Had to Fix the **Sequence Length** to **20** and **Pad** with **0**'s to make **
  The training time for the model was about **6 hours**
 
 ### Loss-Iteration Curve
-![Loss-Iteration Curve for 1100 Epochs](/loss_curve.png)
+![Loss-Iteration Curve for 4050 Epochs](/loss_curve.png)
 
 ### Downloading Model
-The Model can be downloaded from <a href="https://drive.google.com/open?id=0B6OWaNVUCQvaN2FjYkF5UGdsa1U">here</a>
+The Model can be downloaded from <a href="https://drive.google.com/open?id=0B6OWaNVUCQvaQ0ZwME9GSXRrTkE">here</a>

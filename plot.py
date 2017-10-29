@@ -1,6 +1,6 @@
 import json
 import matplotlib.pyplot as plt
-model = json.load(open("model1.json","rb"))
+model = json.load(open("model.json","rb"))
 loss = model['loss']
 
 plt.plot(loss)
