@@ -12,7 +12,7 @@ def affine_forward(x, w, b):
         Returns out of shape (N,H)
 
     """
-    out = x.dot(w)+b
+    out = x.dot(w) + b
     cache = (x,w,b)
     return out,cache
 
